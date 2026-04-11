@@ -1,9 +1,224 @@
-# Encrypted by Baldan
-import marshal, zlib, base64, sys
+import os, requests, json, time, sys
 
+# Pystyle шалгах
 try:
-    exec(marshal.loads(zlib.decompress(base64.b64decode("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"))))
-except Exception as e:
-    print(f"Error: {e}")
-    print("If you see this error, please use main_backup.py")
-    sys.exit(1)
+    from pystyle import Colors, Colorate
+    PYSTYLE_AVAILABLE = True
+except ImportError:
+    PYSTYLE_AVAILABLE = False
+    print("⚠️ pystyle not found! Installing...")
+    os.system("pip install pystyle")
+    from pystyle import Colors, Colorate
+
+# --- ТОХИРГОО ---
+API_BASE_URL = "https://kayzennv3-cpm.squareweb.app/api"
+API_KEY = "APIKEY38"
+FIREBASE_URL = "https://kayzen-1ff37-default-rtdb.firebaseio.com/users.json"
+ADMIN_KEY = "Telmunn69"
+__CHANNEL__ = "BaldanShopChannel"
+__CHAT__ = "BaldanShopChat"
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def banner():
+    clear_screen()
+    brand = "Car Parking Multiplayer Tool"
+    
+    # Horizontal colours - SOLONGO
+    print(Colorate.Horizontal(Colors.rainbow, "="*60))
+    print(Colorate.Horizontal(Colors.rainbow, brand.center(60)))
+    print(Colorate.Horizontal(Colors.rainbow, "="*60))
+    print(Colorate.Horizontal(Colors.blue_to_red, " PLEASE LOGOUT FROM CPM BEFORE USING THIS TOOL".center(60)))
+    print(Colorate.Horizontal(Colors.red_to_blue, " SHARING THE ACCESS KEY IS NOT ALLOWED".center(60)))
+    print(Colorate.Horizontal(Colors.rainbow, f" Telegram: @{__CHANNEL__}  @{__CHAT__}".center(60)))
+    print(Colorate.Horizontal(Colors.rainbow, "="*60))
+
+class CPMApiClient:
+    def __init__(self): 
+        self.auth = None
+        
+    def login(self, e, p):
+        try:
+            res = requests.post(
+                f"{API_BASE_URL}/account_login", 
+                params={"api_key": API_KEY}, 
+                json={"account_email": e, "account_password": p},
+                timeout=10
+            ).json()
+            if res.get('ok') or str(res.get('message', '')).upper() == "SUCCESSFUL":
+                self.auth = res.get('data', {}).get('auth') or res.get('auth')
+                return True
+            return False
+        except:
+            return False
+            
+    def make_req(self, end, data):
+        try:
+            res = requests.post(
+                f"{API_BASE_URL}/{end}", 
+                params={"api_key": API_KEY}, 
+                json=data,
+                timeout=10
+            ).json()
+            return res.get('ok') or res.get('error') == 0
+        except:
+            return False
+
+def load_db():
+    try:
+        response = requests.get(FIREBASE_URL, timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        return {}
+    except:
+        return {}
+
+def update_bal(uid, bal):
+    try:
+        url = f"https://kayzen-1ff37-default-rtdb.firebaseio.com/users/{uid}.json"
+        requests.patch(url, json={"balance": bal}, timeout=10)
+        return True
+    except:
+        return False
+
+def main():
+    while True:
+        banner()
+        
+        # Horizontal colours - INPUT
+        print(Colorate.Horizontal(Colors.cyan_to_blue, "[?] Enter your account details".center(60)))
+        
+        e = input(Colorate.Horizontal(Colors.green_to_white, "[?] Account Email: ")).strip()
+        p = input(Colorate.Horizontal(Colors.green_to_white, "[?] Account Password: ")).strip()
+        k = input(Colorate.Horizontal(Colors.green_to_white, "[?] Access Key: ")).strip()
+        
+        if not e or not p or not k:
+            banner()
+            print(Colorate.Horizontal(Colors.red_to_white, "[✘] All fields are required!"))
+            time.sleep(2)
+            continue
+
+        db = load_db()
+        user_id_ref, found_user = None, None
+        
+        if k != ADMIN_KEY:
+            for uid, data in db.items():
+                if data and str(data.get('key', '')) == str(k):
+                    user_id_ref, found_user = uid, data
+                    break
+        
+        # Unlimited эсэхийг шалгах
+        is_unlimited = (k == ADMIN_KEY) or (found_user and found_user.get('is_unlimited') == True)
+        
+        if k != ADMIN_KEY and (not found_user or found_user.get('is_blocked')):
+            banner()
+            print(Colorate.Horizontal(Colors.red_to_white, f"[✘] Invalid or blocked Access Key: {k}"))
+            time.sleep(3)
+            continue
+
+        cpm = CPMApiClient()
+        if not cpm.login(e, p):
+            banner()
+            print(Colorate.Horizontal(Colors.red_to_white, f"[✘] Login failed for: {e}"))
+            time.sleep(3)
+            continue
+
+        # Main menu loop
+        while True:
+            banner()
+            db = load_db()
+            
+            if not is_unlimited:
+                current_bal = int(db.get(user_id_ref, {}).get('balance', 0))
+            else:
+                current_bal = 999999
+            
+            # Horizontal colours - Мэдээлэл
+            print(Colorate.Horizontal(Colors.blue_to_cyan, f"Account Email: {e}"))
+            print(Colorate.Horizontal(Colors.green_to_white, f"Balance: {'Unlimited' if is_unlimited else f'{current_bal:,}'}"))
+            print(Colorate.Horizontal(Colors.yellow_to_red, f"Access Key: {k}"))
+            print(Colorate.Horizontal(Colors.rainbow, "="*60))
+
+            # Menu - Horizontal colours
+            print(Colorate.Horizontal(Colors.rainbow, "{01}: SET RANK".ljust(45) + "20.5K"))
+            print(Colorate.Horizontal(Colors.orange_to_red, "{02}: CHANGE EMAIL".ljust(45) + "15.5K"))
+            print(Colorate.Horizontal(Colors.yellow_to_green, "{03}: CHANGE PASSWORD".ljust(45) + "10.0K"))
+            print(Colorate.Horizontal(Colors.green_to_blue, "{04}: REGISTER NEW ACCOUNT".ljust(45) + "1.0K"))
+            print(Colorate.Horizontal(Colors.purple_to_red, "{05}: LOGOUT FROM ACCOUNT"))
+            print(Colorate.Horizontal(Colors.red_to_black, "{06}: EXIT FROM TOOL"))
+            print(Colorate.Horizontal(Colors.rainbow, "="*60))
+
+            ch = input(Colorate.Horizontal(Colors.white_to_cyan, "\n[?] Select: ")).strip()
+            
+            if ch in ["5", "05"]:
+                break
+            if ch in ["6", "06"]:
+                print(Colorate.Horizontal(Colors.green_to_white, "[✓] Goodbye!"))
+                sys.exit()
+
+            costs = {"01":20500, "1":20500, "02":15500, "2":15500, 
+                    "03":10000, "3":10000, "04":1000, "4":1000}
+            cost = costs.get(ch.zfill(2) if len(ch) == 1 else ch, 0)
+
+            if current_bal >= cost:
+                success = False
+                
+                if ch in ["1", "01"]:
+                    print(Colorate.Horizontal(Colors.blue_to_cyan, "[*] Setting rank..."))
+                    success = cpm.make_req("set_rank", {"account_auth": cpm.auth})
+                    
+                elif ch in ["2", "02"]:
+                    ne = input(Colorate.Horizontal(Colors.green_to_white, "[?] New Email: ")).strip()
+                    if ne:
+                        success = cpm.make_req("change_email", {"account_auth": cpm.auth, "new_email": ne})
+                        if success:
+                            e = ne
+                    
+                elif ch in ["3", "03"]:
+                    np = input(Colorate.Horizontal(Colors.green_to_white, "[?] New Password: ")).strip()
+                    if np:
+                        success = cpm.make_req("change_password", {"account_auth": cpm.auth, "new_password": np})
+                        if success:
+                            p = np
+                    
+                elif ch in ["4", "04"]:
+                    re = input(Colorate.Horizontal(Colors.cyan_to_blue, "[?] Reg Email: ")).strip()
+                    rp = input(Colorate.Horizontal(Colors.cyan_to_blue, "[?] Reg Pass: ")).strip()
+                    if re and rp:
+                        try:
+                            resp = requests.post(
+                                f"{API_BASE_URL}/account_register", 
+                                params={"api_key": API_KEY}, 
+                                json={"account_email": re, "account_password": rp},
+                                timeout=10
+                            ).json()
+                            success = resp.get('ok', False)
+                        except:
+                            success = False
+
+                if success:
+                    if not is_unlimited:
+                        new_balance = current_bal - cost
+                        update_bal(user_id_ref, new_balance)
+                        print(Colorate.Horizontal(Colors.green_to_white, f"[✓] New balance: {new_balance:,}"))
+                    
+                    print(Colorate.Horizontal(Colors.green_to_white, "✓ SUCCESSFUL!"))
+                    
+                    exit_choice = input(Colorate.Horizontal(Colors.yellow_to_white, "[?] Do you want to Exit? (y/n): ")).strip().lower()
+                    if exit_choice == "y":
+                        sys.exit()
+                else:
+                    print(Colorate.Horizontal(Colors.red_to_white, "✘ FAILED!"))
+            else:
+                print(Colorate.Horizontal(Colors.red_to_white, f"✘ INSUFFICIENT BALANCE! Need {cost:,}, you have {current_bal:,}"))
+            
+            time.sleep(2)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(Colorate.Horizontal(Colors.yellow_to_white, "\n[!] Interrupted by user"))
+        sys.exit()
+
